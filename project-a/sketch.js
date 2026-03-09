@@ -22,6 +22,8 @@ let duration = 200;
 let angle;
 let isDay;
 
+// remember to add let canvas = 
+
 function setup() {
   let canvas = createCanvas(800, 500);
   canvas.parent("p5-canvas-container")
