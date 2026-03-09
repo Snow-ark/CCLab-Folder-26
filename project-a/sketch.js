@@ -20,9 +20,6 @@ let timer = 0;
 let duration = 200;
 
 let angle;
-let isDay;
-
-// remember to add let canvas = 
 
 function setup() {
   let canvas = createCanvas(800, 500);
@@ -35,22 +32,22 @@ function setup() {
 }
 
 function draw() {
-  
   //background change
   angle = frameCount * 0.007;
-  isDay = sin(angle) < 0;
 
-  angle += 0.007;
+  let skyAmount = map(cos(angle), -1, 1, 0, 1);
+  let topR = lerp(8, 70, skyAmount);
+  let topG = lerp(15, 150, skyAmount);
+  let topB = lerp(45, 255, skyAmount);
 
-  if (angle > TWO_PI) {
-    angle = 0;
-    isDay = !isDay;
-  }
+  let bottomR = lerp(20, 180, skyAmount);
+  let bottomG = lerp(40, 220, skyAmount);
+  let bottomB = lerp(90, 255, skyAmount);
+  
+  skyGradient(topR, topG, topB, bottomR, bottomG, bottomB);
 
-  if (isDay) {
-    daylight();
-  } else {
-    night();
+  if (skyAmount < 0.4) {
+    stars();
   }
 
   //upper part
@@ -87,8 +84,6 @@ function draw() {
   }
 
   angel(angelX, angelY);
-
-  
 
   city();
 
@@ -157,10 +152,6 @@ function halo() {
   strokeWeight(2);
   translate(0, sin(frameCount * 0.01) * 30);
 
-  //   let expand = sin((frameCount * 0.01)+1/2) * 35;
-
-  //   for (let i = -1; i < 3; i++) { // making multiple eclipses
-  //   ellipse(0, -100, 150 + i * 20 + expand, 40 + i * 10 + expand * 0.3)}
   ellipse(0, -100, 150, 40);
 
   //pulsing halo
@@ -213,8 +204,6 @@ function wings() {
   triangle(-130 + 70, -37 - 30, -92 + 70, -30 - 30, 0, 0); // wing 2
   triangle(-160 + 70, -32 - 30, -115 + 70, -25 - 30, 0, 0); // wing 3
 
-  // fill("blue")
-  // circle(0, 0, 5);
   pop();
 
   pop();
@@ -276,9 +265,13 @@ function city() {
 }
 
 function clocktower() {
+
   // tower 1
   push();
   translate(700, 355);
+
+  let d1 = dist(mouseX, mouseY, 700, 355);
+  let glow = map(sin(frameCount * 0.08), -1, 1, 40, 120); // pulsing glow
 
   // tower body
   stroke(212, 194, 150);
@@ -306,6 +299,17 @@ function clocktower() {
   noStroke();
   rect(17, 0, 34, 5);
   pop();
+
+  //glow
+  if (d1 < 40) {
+    noStroke();
+
+    fill(255, 240, 180, glow * 0.5);
+    circle(0, 0, 120);
+
+    fill(255, 240, 180, glow * 0.8);
+    circle(0, 0, 100);
+  }
 
   pop();
 
@@ -313,6 +317,9 @@ function clocktower() {
   push();
   translate(100, 355);
 
+  let d2 = dist(mouseX, mouseY, 100, 355);
+  let glow2 = map(sin(frameCount * 0.08), -1, 1, 40, 120); // pulsing glow
+
   // tower body
   stroke(212, 194, 150);
   strokeWeight(2);
@@ -340,10 +347,22 @@ function clocktower() {
   rect(17, 0, 34, 5);
   pop();
 
+  //glow
+  if (d2 < 40) {
+    noStroke();
+
+    fill(255, 240, 180, glow2 * 0.5);
+    circle(0, 0, 120);
+
+    fill(255, 240, 180, glow2 * 0.8);
+    circle(0, 0, 100);
+  }
+
   pop();
 }
 
-function circles() { // the sun and moon
+function circles() {
+  // the sun and moon
   push();
   translate(width / 2, height / 2);
   rotate(frameCount * 0.007);
@@ -354,18 +373,6 @@ function circles() { // the sun and moon
 
   circle(80, -350, 100);
   pop();
-}
-
-function night() {
-  for (let y = 0; y < height; y++) {
-    let r = map(y, 0, height, 8, 20);
-    let g = map(y, 0, height, 15, 40);
-    let b = map(y, 0, height, 45, 90);
-
-    stroke(r, g, b);
-    line(0, y, width, y);
-  }
-  stars();
 }
 
 function stars(x, y) {
@@ -404,19 +411,14 @@ function stars(x, y) {
   pop();
 }
 
-function daylight() {
+
+function skyGradient(r1, g1, b1, r2, g2, b2) {
   for (let y = 0; y < height; y++) {
-    let r = map(y, 0, height, 70, 180);
-    let g = map(y, 0, height, 150, 220);
-    let b = map(y, 0, height, 255, 255);
+    let r = map(y, 0, height, r1, r2);
+    let g = map(y, 0, height, g1, g2);
+    let b = map(y, 0, height, b1, b2);
 
     stroke(r, g, b);
     line(0, y, width, y);
   }
-  
-  clouds()
-}
-
-function clouds(){
-  
 }
