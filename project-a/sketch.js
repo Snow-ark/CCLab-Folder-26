@@ -23,9 +23,9 @@ let angle;
 let isDay;
 
 function setup() {
-  createCanvas(800, 500);
+  let canvas = createCanvas(800, 500);
   canvas.parent("p5-canvas-container")
-  
+
   xRandom = random(0, 100);
   yRandom = random(0, 50);
   angelX = width / 2;
