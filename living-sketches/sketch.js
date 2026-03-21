@@ -85,10 +85,6 @@ currentFrame = floor(frameCount / speed) % flowers.length;
 
 
 
-
-
-
-
 }
 
 function keyPressed(){ // just to shift where you want the flower to be
