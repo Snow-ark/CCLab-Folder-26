@@ -8,6 +8,23 @@ let riverH = 150;
 let offsetX = 0;
 let worldScroll = 0;
 
+let showChoice = false;
+let choiceMade = "";
+let nextChoicePoint = 900; 
+
+let normalChoiceCount = 0;
+
+let cliffStart = 4300;
+let cliffX;
+
+let showFinalChoice = false;
+let finalChoiceMade = "";
+
+let ending = "";
+let fallingY = 0;
+let fallingSpeed = 0;
+let skaterForward = 0;
+
 let cracks = [
   [0.25, 0.50, 0.38, 0.43],
   [0.38, 0.43, 0.44, 0.57],
@@ -27,7 +44,10 @@ function setup() {
   skaterX = width / 2;
   skaterY = riverY + riverH * 0.18;
 
+  cliffX = 5000;
+
   makeTrees();
+
 }
 
 function draw() {
@@ -37,204 +57,234 @@ function draw() {
   frozenriver(offsetX, riverY, width, riverH);
   frozenriver(offsetX - width, riverY, width, riverH);
 
-  // land and grass 
+  // land and grass + cliff
   drawLand();
   drawGrass();
+  
 
   // trees
   for (let i = 0; i < trees.length; i++) {
     trees[i].display();
   }
 
-  // skater (FIX)
+  drawCliff();
+
+ 
+
+// normal yes/no choices only happen 3 times
+if (
+  worldScroll > nextChoicePoint &&
+  !showChoice &&
+  normalChoiceCount < 3 &&
+  !showFinalChoice
+) {
+  showChoice = true;
+}
+
+// final choice appears when the skater reaches the cliff edge
+let cliffScreenX = cliffX - worldScroll;
+
+if (
+  normalChoiceCount >= 3 &&
+  cliffScreenX < skaterX + 110 &&
+  finalChoiceMade === ""
+) {
+  showFinalChoice = true;
+}
+
+ // skater (FIX)
+  drawSkater();
+
+  updateEnding();
+
+
+if (showChoice) {
+  drawChoiceScreen();
+}
+
+if (showFinalChoice) {
+  drawFinalChoiceScreen();
+}
+
+}
+
+
+function drawChoiceScreen() {
+  push();
+
+  // dark transparent overlay
+  fill(0, 0, 0, 120);
+  rect(0, 0, width, height);
+
+  // question text
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  text("Do you want to continue?", width / 2, height / 2 - 90);
+
+  // yes button
+  fill(240);
+  rect(width / 2 - 140, height / 2, 110, 55, 15);
+  fill(0);
+  textSize(24);
+  text("Yes", width / 2 - 85, height / 2 + 28);
+
+  // no button
+  fill(240);
+  rect(width / 2 + 30, height / 2, 110, 55, 15);
+  fill(0);
+  text("No", width / 2 + 85, height / 2 + 28);
+
+  pop();
+}
+
+
+function drawFinalChoiceScreen() {
+  push();
+
+  fill(0, 0, 0, 150);
+  rect(0, 0, width, height);
+
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(30);
+  text("Are you really, really sure you want to continue?", width / 2, height / 2 - 90);
+
+  fill(240);
+  rect(width / 2 - 150, height / 2, 120, 55, 15);
+  fill(0);
+  textSize(24);
+  text("Yes", width / 2 - 90, height / 2 + 28);
+
+  fill(240);
+  rect(width / 2 + 30, height / 2, 120, 55, 15);
+  fill(0);
+  text("No", width / 2 + 90, height / 2 + 28);
+
+  pop();
+}
+
+function updateEnding() {
+  if (ending === "ice") {
+    fallingY += fallingSpeed;
+    fallingSpeed += 0.25;
+
+    drawBreakingIce();
+  }
+
+  if (ending === "cliff") {
+    // after final yes, scrolling will move the skater forward
+    if (skaterForward > 180) {
+      fallingY += fallingSpeed;
+      fallingSpeed += 0.25;
+    }
+  }
+}
+
+function drawBreakingIce() {
+  push();
+
+  stroke(255);
+  strokeWeight(3);
+
+  line(skaterX - 80, skaterY + 20, skaterX - 30, skaterY + 50);
+  line(skaterX - 30, skaterY + 50, skaterX + 20, skaterY + 30);
+  line(skaterX + 20, skaterY + 30, skaterX + 70, skaterY + 60);
+
+  line(skaterX - 40, skaterY - 20, skaterX - 10, skaterY + 30);
+  line(skaterX + 30, skaterY - 10, skaterX + 10, skaterY + 40);
+
+  pop();
+}
+
+function drawSkater() {
+  push();
+
+  let x = skaterX + skaterForward;
+  let y = skaterY + fallingY;
+
   fill(30);
   noStroke();
-  circle(skaterX, skaterY, skaterSize);
+  circle(x, y, skaterSize);
+
+  pop();
 }
 
-function frozenriver(x, y, w, h) {
-  noStroke();
 
-  // main river
-  fill(170, 210, 230);
-  beginShape();
-  vertex(x, y);
-
-  bezierVertex(
-    x + w * 0.20, y - h * 0.20,
-    x + w * 0.40, y + h * 0.15,
-    x + w * 0.60, y - h * 0.05
-  );
-
-  bezierVertex(
-    x + w * 0.80, y - h * 0.25,
-    x + w * 0.90, y + h * 0.10,
-    x + w, y - h * 0.10
-  );
-
-  vertex(x + w, y + h);
-
-  bezierVertex(
-    x + w * 0.85, y + h * 1.20,
-    x + w * 0.65, y + h * 0.75,
-    x + w * 0.50, y + h
-  );
-
-  bezierVertex(
-    x + w * 0.30, y + h * 1.20,
-    x + w * 0.15, y + h * 0.70,
-    x, y + h * 0.85
-  );
-
-  endShape(CLOSE);
-
-  // highlight
-  fill(200, 235, 245, 120);
-  beginShape();
-  vertex(x, y + h * 0.15);
-
-  bezierVertex(
-    x + w * 0.20, y,
-    x + w * 0.40, y + h * 0.30,
-    x + w * 0.60, y + h * 0.10
-  );
-
-  bezierVertex(
-    x + w * 0.80, y - h * 0.05,
-    x + w * 0.90, y + h * 0.25,
-    x + w, y + h * 0.05
-  );
-
-  vertex(x + w, y + h * 0.60);
-
-  bezierVertex(
-    x + w * 0.85, y + h * 0.80,
-    x + w * 0.65, y + h * 0.50,
-    x + w * 0.50, y + h * 0.70
-  );
-
-  bezierVertex(
-    x + w * 0.30, y + h * 0.90,
-    x + w * 0.15, y + h * 0.55,
-    x, y + h * 0.65
-  );
-
-  endShape(CLOSE);
-
-  // cracks
-  stroke(230, 245, 255);
-  strokeWeight(2);
-  noFill();
-
-  for (let i = 0; i < cracks.length; i++) {
-    let c = cracks[i];
-    line(
-      x + w * c[0],
-      y + h * c[1],
-      x + w * c[2],
-      y + h * c[3]
-    );
-  }
-}
-
-function drawLand() {
-  noStroke();
-  fill(232, 238, 232);
-
-  rect(0, riverY + riverH + 18, width, height - (riverY + riverH + 18));
-}
-
-function drawGrass() {
-  let grassAmount = 120 - worldScroll * 0.025;
-  if (grassAmount < 15) {
-    grassAmount = 15;
+function mousePressed() {
+  if (showFinalChoice) {
+  if (
+    mouseX > width / 2 - 150 &&
+    mouseX < width / 2 - 30 &&
+    mouseY > height / 2 &&
+    mouseY < height / 2 + 55
+  ) {
+    finalChoiceMade = "yes";
+    showFinalChoice = false;
+    ending = "cliff";
   }
 
-  strokeWeight(2);
+  if (
+    mouseX > width / 2 + 30 &&
+    mouseX < width / 2 + 150 &&
+    mouseY > height / 2 &&
+    mouseY < height / 2 + 55
+  ) {
+    finalChoiceMade = "no";
+    showFinalChoice = false;
+    ending = "ice";
+    fallingSpeed = 1;
+  }
 
-  for (let i = 0; i < grassAmount; i++) {
-    let gx = map(i, 0, grassAmount - 1, 0, width);
+  return;
+}
 
-    let gy = riverY + riverH + 28 + noise(i * 0.2) * 18;
-
-    let gh = 14 + noise(i * 0.3) * 20;
-
-    let grassAlpha = 180 - worldScroll * 0.04;
-    if (grassAlpha < 40) {
-      grassAlpha = 40;
+  if (showChoice) {
+    // yes button area
+    if (
+      mouseX > width / 2 - 140 &&
+      mouseX < width / 2 - 30 &&
+      mouseY > height / 2 &&
+      mouseY < height / 2 + 55
+    ) {
+      choiceMade = "yes";
+      showChoice = false;
+      nextChoicePoint += 1500;
+      normalChoiceCount++;
     }
 
-    stroke(95, 140, 95, grassAlpha);
-
-    line(gx, gy, gx - 3, gy - gh);
-    line(gx, gy, gx, gy - gh - 5);
-    line(gx, gy, gx + 3, gy - gh);
+    // no button area
+    if (
+      mouseX > width / 2 + 30 &&
+      mouseX < width / 2 + 140 &&
+      mouseY > height / 2 &&
+      mouseY < height / 2 + 55
+    ) {
+      choiceMade = "no";
+      showChoice = false;
+      nextChoicePoint += 1500;
+      normalChoiceCount++;
+    }
   }
 }
 
-function makeTrees() {
-  trees = [];
-
-  for (let i = 0; i < 18; i++) {
-    let tx = map(i, 0, 17, 60, width - 60);
-    let ty = riverY - random(120, 200);
-    let ts = random(0.75, 1.25);
-
-    trees.push(new Tree(tx, ty, ts));
-  }
-}
-
-class Tree {
-  constructor(x, y, s) {
-    this.x = x;
-    this.y = y;
-    this.s = s;
-  }
-
-  display() {
-    push();
-
-    let drawX = this.x - worldScroll * 0.12;
-
-    while (drawX < -100) {
-      drawX += width + 200;
-    }
-
-    translate(drawX, this.y);
-    scale(this.s);
-
-    let fade = 255 - worldScroll * 0.06;
-    if (fade < 0) {
-      fade = 0;
-    }
-
-    let shrink = 1 - worldScroll * 0.00012;
-    if (shrink < 0.45) {
-      shrink = 0.45;
-    }
-
-    scale(shrink);
-
-    if (fade > 0) {
-      noStroke();
-
-      // trunk
-      fill(110, 80, 60, fade);
-      rect(-8, 0, 16, 70);
-
-      // top
-      fill(70, 120, 70, fade);
-      ellipse(0, -20, 70, 70);
-      ellipse(-20, -5, 50, 50);
-      ellipse(20, -5, 50, 50);
-    }
-
-    pop();
-  }
-}
 
 function mouseWheel(event) {
+  if (showChoice || showFinalChoice) {
+    return false;
+  }
+
   let moveAmount = event.delta * 0.35;
+
+  if (ending === "cliff") {
+  skaterForward += abs(moveAmount) * 0.5;
+
+  if (skaterForward > 180 && fallingSpeed === 0) {
+    fallingSpeed = 1;
+  }
+
+  return false;
+}
 
   offsetX -= moveAmount;
 
