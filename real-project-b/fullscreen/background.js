@@ -86,14 +86,58 @@ function frozenriver(x, y, w, h) {
 }
 
 function drawLand() {
+  push();
   noStroke();
-  fill(232, 238, 232);
+let fade = map(worldScroll, 0, (cliffX - width) * 1.6, 255, 40);
+  
+  if (fade < 40) fade = 40;
 
-  rect(0, riverY + riverH + 18, width, height - (riverY + riverH + 18));
+  // upper grassy bank beside the river
+  fill(115, 155, 105, fade);
+  beginShape();
+  vertex(0, riverY - 245);
+  vertex(width, riverY - 245);
+  vertex(width, riverY + 5);
+
+  bezierVertex(width * 0.75, riverY - 10, width * 0.5, riverY + 10, 0, riverY - 5);
+
+  endShape(CLOSE);
+
+  // lower grassy bank beside the river
+  fill(125, 165, 110, fade);
+  beginShape();
+  vertex(0, riverY + riverH + 25);
+
+  bezierVertex(width * 0.25, riverY + riverH + 5, width * 0.55, riverY + riverH + 35, width, riverY + riverH + 15);
+
+  vertex(width, height);
+  vertex(0, height);
+  endShape(CLOSE);
+
+  pop();
+}
+
+function drawMountains() {
+  push();
+  noStroke();
+
+  // far mountains
+  fill(160, 180, 185);
+  triangle(-100, riverY - 260, 180, riverY - 520, 460, riverY - 260);
+  triangle(280, riverY - 260, 620, riverY - 560, 980, riverY - 260);
+  triangle(760, riverY - 260, 1080, riverY - 500, 1400, riverY - 260);
+
+  // snow caps
+  fill(240, 248, 250);
+  triangle(180, riverY - 520, 120, riverY - 460, 235, riverY - 460);
+  triangle(620, riverY - 560, 555, riverY - 485, 690, riverY - 485);
+  triangle(1080, riverY - 500, 1025, riverY - 440, 1140, riverY - 440);
+
+  pop();
 }
 
 function drawGrass() {
-  let grassAmount = 120 - worldScroll * 0.025;
+  let grassAmount = 120 - worldScroll * 0.012;
   if (grassAmount < 15) {
     grassAmount = 15;
   }
@@ -107,7 +151,7 @@ function drawGrass() {
 
     let gh = 14 + noise(i * 0.3) * 20;
 
-    let grassAlpha = 180 - worldScroll * 0.04;
+    let grassAlpha = 180 - worldScroll * 0.02;
     if (grassAlpha < 40) {
       grassAlpha = 40;
     }
@@ -125,8 +169,8 @@ function makeTrees() {
 
   for (let i = 0; i < 18; i++) {
     let tx = map(i, 0, 17, 60, width - 60);
-    let ty = riverY - random(120, 200);
-    let ts = random(0.75, 1.25);
+    let ty = riverY - random(220, 150);
+    let ts = random(0.45, 1);
 
     trees.push(new Tree(tx, ty, ts));
   }
@@ -156,7 +200,7 @@ class Tree {
       fade = 0;
     }
 
-    let shrink = 1 - worldScroll * 0.00005;
+    let shrink = 1 - worldScroll * 0.00002;
     if (shrink < 0.45) {
       shrink = 0.45;
     }
@@ -167,14 +211,18 @@ class Tree {
       noStroke();
 
       // trunk
-      fill(110, 80, 60, fade);
-      rect(-8, 0, 16, 70);
+      fill(105, 75, 55, fade);
+      rect(-7, 10, 14, 75);
 
-      // top
-      fill(70, 120, 70, fade);
-      ellipse(0, -20, 70, 70);
-      ellipse(-20, -5, 50, 50);
-      ellipse(20, -5, 50, 50);
+      // christmas tree layers
+      fill(45, 105, 70, fade);
+      triangle(0, -95, -45, -25, 45, -25);
+
+      fill(35, 95, 60, fade);
+      triangle(0, -65, -55, 15, 55, 15);
+
+      fill(25, 85, 50, fade);
+      triangle(0, -30, -65, 65, 65, 65);
     }
 
     pop();
@@ -189,7 +237,7 @@ function drawCliff() {
 
     noStroke();
 
-    // keep the same background color beyond the cliff
+    // same background beyond the cliff
     fill(220, 235, 245);
     rect(cliffScreenX + 120, 0, width, height);
 
@@ -202,7 +250,7 @@ function drawCliff() {
     vertex(cliffScreenX - 450, riverY + riverH);
     endShape(CLOSE);
 
-    // cliff top, like a ledge
+    // cliff top
     fill(125, 115, 105);
     beginShape();
     vertex(cliffScreenX - 180, riverY + riverH - 20);
