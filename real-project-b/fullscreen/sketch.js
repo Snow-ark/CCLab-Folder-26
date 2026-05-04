@@ -385,7 +385,6 @@ if (timeLeft <= 0) {
   
 }
 
-
 function drawFinalChoiceScreen() {
   push();
 
