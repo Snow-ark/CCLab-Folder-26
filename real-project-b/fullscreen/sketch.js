@@ -30,6 +30,11 @@ let situationIndex = 0;
 
 let boulderX;
 let boulderTriggered = false;
+let boulderRollingAway = false;
+let boulderRollX = 0;
+let boulderRollY = 0;
+let boulderAngle = 0;
+let stoneSound;
 
 let duckDone = false;
 let duckImg;
@@ -56,6 +61,9 @@ let catX;
 let catY;
 let catTimer = 0;
 let nextCatTime = 5000;
+
+let memeAppearCount = 0;
+let maxMemeAppearances = 2;
 
 let crackX;
 let crackTriggered = false;
@@ -102,6 +110,7 @@ let cracks = [
 ];
 
 let trees = [];
+let swooshes = [];
 let snowflakes = [];
 let maxSnow = 60;
 
@@ -112,6 +121,13 @@ let windSound;
 let skatingSound;
 let audioStarted = false;
 let memeActive = false;
+
+let instructionText =
+  "Instructions:\n" +
+  "Click or scroll to start the music.\n" +
+  "Scroll to move the skater through her storyline.\n" +
+  "Click the skater for encouragement :3\n" +
+  "Look for background memes and scroll to return.\n";
 
 
 
@@ -126,6 +142,7 @@ function preload() {
   iceCrackSound = loadSound("ice-crack.mp3");
   windSound = loadSound("wind.mp3");
   skatingSound = loadSound("skating.mp3");
+  stoneSound = loadSound("stone.mp3");
 
   chickenGif = loadImage("dancing chicken.gif");
   lavaChickenSound = loadSound("lava-chicken.mp3");
@@ -257,6 +274,7 @@ if (
   drawChicken();
   updateCat();
   drawCat();
+  drawSwooshes();
   drawSkater();
 
 
@@ -268,7 +286,17 @@ if (showFinalChoice) {
   drawFinalChoiceScreen();
 }
 
+if (boulderRollingAway && boulderRollX > width + 80) {
+  boulderRollingAway = false;
+  situationActive = false;
+
+  if (stoneSound && stoneSound.isPlaying()) {
+    stoneSound.stop();
+  }
+}
+
 drawEndingText();
+drawInstructions();
 
 }
 
@@ -425,9 +453,11 @@ function updateEnding() {
 
 function drawSkater() {
   push();
+  let aliveBounce = sin(frameCount * 0.08) * 3;
+  let aliveTilt = sin(frameCount * 0.04) * 0.03;
 
   let x = skaterX + skaterForward;
-  let y = skaterY + fallingY - 60;
+  let y = skaterY + fallingY - 60 + aliveBounce;
 
   imageMode(CENTER);
 
@@ -441,9 +471,10 @@ rotate(sin(frameCount * 0.12) * 0.1);
 
   image(skaterSpin, 0, 0, skaterSize * 2.5, skaterSize * 3.0);
 } else {
-  image(skaterRight, x, y, skaterSize * 2.5, skaterSize * 3.0);
+  translate(x, y);
+  rotate(aliveTilt);
+  image(skaterRight, 0, 0, skaterSize * 2.5, skaterSize * 3.0);
 }
-
   pop();
 }
 
@@ -515,11 +546,11 @@ function cleanChicken(img) {
 }
 
 function updateChicken() {
-  if (showChoice || showFinalChoice || gameLocked || ending !== "") return;
-
+  if (showChoice || showFinalChoice || gameLocked || ending !== "" || memeAppearCount >= maxMemeAppearances || catVisible) return;
   if (!chickenVisible && millis() > nextChickenTime) {
     if (random(1) < 0.01) {
       chickenVisible = true;
+      memeAppearCount++;
       chickenX = width * 0.18;
       chickenY = riverY - 120;
       chickenTimer = millis();
@@ -546,20 +577,22 @@ function drawChicken() {
 }
 
 function updateCat() {
-  if (showChoice || showFinalChoice || gameLocked || ending !== "") return;
-
-  if (!catVisible && millis() > nextCatTime) {
-    if (random(1) < 0.008) {
-      catVisible = true;
-      catX = random(width * 0.18, width * 0.45);
-      catY = random(riverY - 210, riverY - 140);
-      catTimer = millis();
-    }
-  }
-
   if (catVisible && millis() - catTimer > 5000) {
     catVisible = false;
     nextCatTime = millis() + random(6000, 12000);
+    return;
+  }
+
+  if (showChoice || showFinalChoice || gameLocked || ending !== "" || memeAppearCount >= maxMemeAppearances || chickenVisible) return;
+
+  if (!catVisible && millis() > nextCatTime) {
+    catVisible = true;
+    memeAppearCount++;
+
+    catX = random(width * 0.18, width * 0.45);
+    catY = random(riverY - 210, riverY - 140);
+
+    catTimer = millis();
   }
 }
 
@@ -834,21 +867,81 @@ function drawBoulder() {
 
   push();
   noStroke();
+
+  let drawX = boulderX;
+  let drawY = y;
+
+  if (boulderRollingAway) {
+    boulderRollX += 6;
+    boulderAngle += 0.08;
+    drawX = boulderRollX;
+    drawY = boulderRollY;
+  }
+
+  translate(drawX, drawY);
+  rotate(boulderAngle);
+
   fill(95, 85, 80);
-  ellipse(boulderX, y, 190, 135);
+  ellipse(0, 0, 190, 135);
 
   fill(130, 120, 115);
-  ellipse(boulderX - 40, y - 30, 55, 35);
+  ellipse(-40, -30, 55, 35);
+
   pop();
 
   if (abs(boulderX - skaterX) < 110 && !boulderTriggered) {
-  boulderTriggered = true;
-  showChoice = true;
-  choiceStartTime = millis();
-  situationActive = false;
-}
+    boulderTriggered = true;
+    boulderRollingAway = true;
+    boulderRollX = boulderX;
+    boulderRollY = y;
+    boulderAngle = 0;
+
+    if (!stoneSound.isPlaying()) {
+      stoneSound.setVolume(0.6);
+      stoneSound.loop();
+    }
+
+    showChoice = true;
+    choiceStartTime = millis();
+  }
+
+  if (boulderRollingAway && boulderRollX > width + 200) {
+    boulderRollingAway = false;
+    situationActive = false;
+
+    if (stoneSound.isPlaying()) {
+      stoneSound.stop();
+    }
+  }
 }
 
+function drawSwooshes() {
+  for (let i = swooshes.length - 1; i >= 0; i--) {
+    let s = swooshes[i];
+
+    push();
+    stroke(255, s.alpha);
+    strokeWeight(1.5);
+
+    // angled blade scratch
+    line(
+      s.x,
+      s.y,
+      s.x - s.len,
+      s.y + random(-2, 2)
+    );
+
+    pop();
+
+    // fade + slight drift
+    s.x -= 1.5;
+    s.alpha -= 10;
+
+    if (s.alpha <= 0) {
+      swooshes.splice(i, 1);
+    }
+  }
+}
 
 function drawNarration() {
   if ((!situationActive && !memeActive) || narrationText === "") return;
@@ -873,6 +966,23 @@ function drawNarration() {
   textSize(16);
   textWrap(WORD);
   text(textToShow, width * 0.16, height - 60, width * 0.68, 35);
+  pop();
+}
+
+function drawInstructions() {
+  push();
+
+  fill(255, 245, 230, 220);
+  stroke(70);
+  strokeWeight(1.5);
+  rect(width - 310, 10, 280, 180, 15);
+
+  noStroke();
+  fill(30);
+  textAlign(LEFT, TOP);
+  textSize(14);
+  textLeading(20);
+  text(instructionText, width - 290, 25, 240, 150);
   pop();
 }
 
@@ -940,7 +1050,7 @@ if (d < 120 && !showChoice && !showFinalChoice && !gameLocked) {
     mouseY > height / 2 &&
     mouseY < height / 2 + 55
   ) {
-    finalChoiceMade = "yes";
+finalChoiceMade = "yes";
 showFinalChoice = false;
 ending = "cliff";
 endingText = "She kept going even when she wasn't sure anymore. And sometimes, chasing a dream means falling for it.";
@@ -978,8 +1088,14 @@ fallingSpeed = 0;
       mouseY > height / 2 &&
       mouseY < height / 2 + 55
     ) {
-      choiceMade = "yes";
+     choiceMade = "yes";
       showChoice = false;
+
+if (stoneSound && stoneSound.isPlaying()) {
+  stoneSound.stop();
+}
+      boulderRollingAway = false;
+
       nextChoicePoint += 2500;
       normalChoiceCount++;
       duckStarted = false;
@@ -1005,6 +1121,10 @@ if (normalChoiceCount >= 3) {
     ) {
       choiceMade = "no";
       showChoice = false;
+      if (stoneSound && stoneSound.isPlaying()) {
+  stoneSound.stop();
+}
+boulderRollingAway = false;
 
       // seagull ending
       startBirdEnding();
@@ -1034,6 +1154,21 @@ if (memeActive) {
   if (showChoice || showFinalChoice) return false;
   
   let moveAmount = abs(event.delta) * 0.35;
+  // back blade scratch
+swooshes.push({
+  x: skaterX + skaterForward - 105,
+  y: skaterY + fallingY + 63,
+  len: random(25, 45),
+  alpha: 200
+});
+
+// front blade scratch
+swooshes.push({
+  x: skaterX + skaterForward + 68,
+  y: skaterY + fallingY + 48,
+  len: random(20, 38),
+  alpha: 200
+});
   if (!skatingSound.isPlaying() && !showChoice && !showFinalChoice && !gameLocked) {
   skatingSound.setVolume(0.7);
   skatingSound.play();
