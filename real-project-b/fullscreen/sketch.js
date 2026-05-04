@@ -152,7 +152,7 @@ skaterRight = cleanSkater(skaterRight, [
   { x: 0, y: 100, w: 20, h: 50 }
 ]);
 skaterSpin = cleanSkater(skaterSpinImg, [
-  { x: 230, y: 210, w: 500, h: 200 }
+  { x: 230, y: 210, w: 500, h: 200} 
 ]);
 
 seagull = cleanSeagull(seagullImg);
@@ -199,7 +199,7 @@ drawMountains();
 drawLand();
 drawSnow();
 
-// river after land
+// river 
 frozenriver(offsetX, riverY, width, riverH);
 frozenriver(offsetX - width, riverY, width, riverH);
 
@@ -211,11 +211,12 @@ drawGrass();
     trees[i].display();
   }
 
-  drawCliff();
+  drawCliff(cliffX, worldScroll, riverY, riverH);
 
  if (
   duckStarted &&
   duckDone &&
+  !showChoice &&
   millis() - choiceStartTime > 1000 &&
   !gameLocked &&
   ending !== "bird" &&
@@ -223,11 +224,12 @@ drawGrass();
 ) {
   showChoice = true;
   situationActive = false;
+  choiceStartTime = millis();
 }
 
 
 
-// final choice appears when the skater reaches the cliff edge
+// final choice 
 let cliffScreenX = cliffX - worldScroll;
 
 if (
@@ -301,7 +303,7 @@ class Snowflake {
 }
 
 function drawSnow() {
-  // slightly increase snow near the end (more intense wind feeling)
+  // increased snow at the end
   let targetSnow = map(worldScroll, 0, cliffX, 40, 90);
 
   while (snowflakes.length < targetSnow) {
@@ -317,11 +319,11 @@ function drawSnow() {
 function drawChoiceScreen() {
   push();
 
-  // dark transparent overlay
+  // dark overlay
   fill(0, 0, 0, 120);
   rect(0, 0, width, height);
 
-  // question text
+  // question
   fill(255);
   textAlign(CENTER, CENTER);
   textSize(32);
@@ -536,7 +538,7 @@ function drawChicken() {
   push();
   imageMode(CENTER);
 
-  // same trick as the duck: white background blends into scene
+
   blendMode(MULTIPLY);
   image(chickenGif, chickenX, chickenY, 80, 80);
 
@@ -567,7 +569,7 @@ function drawCat() {
   push();
   imageMode(CENTER);
 
-  // same background blending style as duck/chicken
+  
   blendMode(MULTIPLY);
   image(catGif, catX, catY, 95, 95);
 
@@ -622,7 +624,7 @@ function drawBreakingIce() {
   stroke(255);
   strokeWeight(3);
 
-  // position crack ON the river surface
+  // crack ON the river surface
   let crackY = riverY + riverH * 0.2;
 
   line(skaterX - 80, crackY + 10, skaterX - 30, crackY + 40);
@@ -679,7 +681,7 @@ function updateBirdEnding() {
   let skaterHeadY = skaterY + fallingY - 175;
 
   if (birdPhase === "dive") {
-    // fly directly toward the skater's head
+    // fly toward the skater's head
     birdX = lerp(birdX, skaterHeadX, 0.035);
     birdY = lerp(birdY, skaterHeadY, 0.035);
 
@@ -747,7 +749,7 @@ function drawDucks() {
     }
   }
 
-  if (duckBubbleStarted && millis() - choiceStartTime > 2000) {
+  if (duckBubbleStarted && millis() - choiceStartTime > 5000) {
     duckDone = true;
   }
 }
@@ -873,12 +875,6 @@ function drawNarration() {
   text(textToShow, width * 0.16, height - 60, width * 0.68, 35);
   pop();
 }
-
-
-
-
-
-
 
 function mousePressed() {
   startAllAudio();

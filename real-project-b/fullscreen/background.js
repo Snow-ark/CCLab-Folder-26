@@ -92,7 +92,7 @@ let fade = map(worldScroll, 0, (cliffX - width) * 1.6, 255, 40);
   
   if (fade < 40) fade = 40;
 
-  // upper grassy bank beside the river
+  // upper grassy bank 
   fill(115, 155, 105, fade);
   beginShape();
   vertex(0, riverY - 245);
@@ -103,7 +103,7 @@ let fade = map(worldScroll, 0, (cliffX - width) * 1.6, 255, 40);
 
   endShape(CLOSE);
 
-  // lower grassy bank beside the river
+  // lower grassy bank 
   fill(125, 165, 110, fade);
   beginShape();
   vertex(0, riverY + riverH + 25);
@@ -214,7 +214,7 @@ class Tree {
       fill(105, 75, 55, fade);
       rect(-7, 10, 14, 75);
 
-      // christmas tree layers
+      // christmas tree 
       fill(45, 105, 70, fade);
       triangle(0, -95, -45, -25, 45, -25);
 
@@ -229,57 +229,53 @@ class Tree {
   }
 }
 
-function drawCliff() {
-  let cliffScreenX = cliffX - worldScroll;
+function drawCliff(cliffWorldX, scrollAmount, riverTop, riverHeight) {
+  let cliffScreenX = cliffWorldX - scrollAmount;
 
   if (cliffScreenX < width + 300) {
     push();
 
     noStroke();
 
-    // same background beyond the cliff
     fill(220, 235, 245);
     rect(cliffScreenX + 120, 0, width, height);
 
-    // river continues to the edge
     fill(170, 210, 230);
     beginShape();
-    vertex(cliffScreenX - 450, riverY);
-    vertex(cliffScreenX + 120, riverY - 15);
-    vertex(cliffScreenX + 120, riverY + riverH + 10);
-    vertex(cliffScreenX - 450, riverY + riverH);
+    vertex(cliffScreenX - 450, riverTop);
+    vertex(cliffScreenX + 120, riverTop - 15);
+    vertex(cliffScreenX + 120, riverTop + riverHeight + 10);
+    vertex(cliffScreenX - 450, riverTop + riverHeight);
     endShape(CLOSE);
 
     // cliff top
     fill(125, 115, 105);
     beginShape();
-    vertex(cliffScreenX - 180, riverY + riverH - 20);
-    vertex(cliffScreenX + 120, riverY + riverH - 35);
-    vertex(cliffScreenX + 190, riverY + riverH - 15);
-    vertex(cliffScreenX + 120, riverY + riverH + 15);
-    vertex(cliffScreenX - 180, riverY + riverH + 20);
+    vertex(cliffScreenX - 180, riverTop + riverHeight - 20);
+    vertex(cliffScreenX + 120, riverTop + riverHeight - 35);
+    vertex(cliffScreenX + 190, riverTop + riverHeight - 15);
+    vertex(cliffScreenX + 120, riverTop + riverHeight + 15);
+    vertex(cliffScreenX - 180, riverTop + riverHeight + 20);
     endShape(CLOSE);
 
-    // downward cliff wall shape
+    // downward cliff
     fill(85, 75, 70);
     beginShape();
-    vertex(cliffScreenX + 120, riverY + riverH - 35);
-    vertex(cliffScreenX + 190, riverY + riverH - 15);
+    vertex(cliffScreenX + 120, riverTop + riverHeight - 35);
+    vertex(cliffScreenX + 190, riverTop + riverHeight - 15);
 
-    // curved front sticking out, then bending downward
     bezierVertex(
-      cliffScreenX + 250, riverY + riverH + 80,
-      cliffScreenX + 210, riverY + riverH + 190,
+      cliffScreenX + 250, riverTop + riverHeight + 80,
+      cliffScreenX + 210, riverTop + riverHeight + 190,
       cliffScreenX + 145, height
     );
 
     vertex(cliffScreenX - 70, height);
 
-    // left cliff wall under the river
     bezierVertex(
-      cliffScreenX - 40, riverY + riverH + 200,
-      cliffScreenX - 80, riverY + riverH + 80,
-      cliffScreenX - 180, riverY + riverH - 20
+      cliffScreenX - 40, riverTop + riverHeight + 200,
+      cliffScreenX - 80, riverTop + riverHeight + 80,
+      cliffScreenX - 180, riverTop + riverHeight - 20
     );
 
     endShape(CLOSE);
@@ -287,29 +283,31 @@ function drawCliff() {
     // darker side shadow
     fill(60, 55, 55);
     beginShape();
-    vertex(cliffScreenX + 145, riverY + riverH + 5);
-    vertex(cliffScreenX + 190, riverY + riverH - 15);
+    vertex(cliffScreenX + 145, riverTop + riverHeight + 5);
+    vertex(cliffScreenX + 190, riverTop + riverHeight - 15);
+
     bezierVertex(
-      cliffScreenX + 245, riverY + riverH + 100,
-      cliffScreenX + 200, riverY + riverH + 220,
+      cliffScreenX + 245, riverTop + riverHeight + 100,
+      cliffScreenX + 200, riverTop + riverHeight + 220,
       cliffScreenX + 145, height
     );
+
     vertex(cliffScreenX + 80, height);
     endShape(CLOSE);
 
     // rock lines
     stroke(120, 110, 105);
     strokeWeight(2);
-    line(cliffScreenX + 20, riverY + riverH + 20, cliffScreenX - 10, height);
-    line(cliffScreenX + 80, riverY + riverH + 10, cliffScreenX + 40, height);
-    line(cliffScreenX + 145, riverY + riverH + 20, cliffScreenX + 110, height);
+    line(cliffScreenX + 20, riverTop + riverHeight + 20, cliffScreenX - 10, height);
+    line(cliffScreenX + 80, riverTop + riverHeight + 10, cliffScreenX + 40, height);
+    line(cliffScreenX + 145, riverTop + riverHeight + 20, cliffScreenX + 110, height);
 
     // cracked ice near edge
     stroke(230, 245, 255);
     strokeWeight(2);
-    line(cliffScreenX - 150, riverY + 45, cliffScreenX - 75, riverY + 70);
-    line(cliffScreenX - 75, riverY + 70, cliffScreenX - 20, riverY + 55);
-    line(cliffScreenX - 105, riverY + 110, cliffScreenX - 35, riverY + 125);
+    line(cliffScreenX - 150, riverTop + 45, cliffScreenX - 75, riverTop + 70);
+    line(cliffScreenX - 75, riverTop + 70, cliffScreenX - 20, riverTop + 55);
+    line(cliffScreenX - 105, riverTop + 110, cliffScreenX - 35, riverTop + 125);
 
     pop();
   }
