@@ -919,24 +919,22 @@ function drawSwooshes() {
     let s = swooshes[i];
 
     push();
-    stroke(255, s.alpha);
+    stroke(255, s[3]);
     strokeWeight(1.5);
 
-    // angled blade scratch
     line(
-      s.x,
-      s.y,
-      s.x - s.len,
-      s.y + random(-2, 2)
+      s[0],
+      s[1],
+      s[0] - s[2],
+      s[1] + random(-2, 2)
     );
 
     pop();
 
-    // fade + slight drift
-    s.x -= 1.5;
-    s.alpha -= 10;
+    s[0] -= 1.5;
+    s[3] -= 10;
 
-    if (s.alpha <= 0) {
+    if (s[3] <= 0) {
       swooshes.splice(i, 1);
     }
   }
@@ -1154,20 +1152,20 @@ if (memeActive) {
   
   let moveAmount = abs(event.delta) * 0.35;
   // back blade scratch
-swooshes.push({
-  x: skaterX + skaterForward - 105,
-  y: skaterY + fallingY + 63,
-  len: random(25, 45),
-  alpha: 200
-});
+swooshes.push([
+  skaterX + skaterForward - 105,
+  skaterY + fallingY + 63,
+  random(25, 45),
+  200
+]);
 
 // front blade scratch
-swooshes.push({
-  x: skaterX + skaterForward + 68,
-  y: skaterY + fallingY + 48,
-  len: random(20, 38),
-  alpha: 200
-});
+swooshes.push([
+  skaterX + skaterForward + 68,
+  skaterY + fallingY + 48,
+  random(20, 38),
+  200
+]);
   if (!skatingSound.isPlaying() && !showChoice && !showFinalChoice && !gameLocked) {
   skatingSound.setVolume(0.7);
   skatingSound.play();
