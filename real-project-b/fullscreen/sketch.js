@@ -169,7 +169,7 @@ skaterRight = cleanSkater(skaterRight, [
   { x: 0, y: 100, w: 20, h: 50 }
 ]);
 skaterSpin = cleanSkater(skaterSpinImg, [
-  { x: 230, y: 210, w: 500, h: 200} 
+  [230, 210, 500, 200]
 ]);
 
 seagull = cleanSeagull(seagullImg);
