@@ -92,7 +92,7 @@ let fade = map(worldScroll, 0, (cliffX - width) * 1.6, 255, 40);
   
   if (fade < 40) fade = 40;
 
-  // upper grassy bank 
+  // upper grassy 
   fill(115, 155, 105, fade);
   beginShape();
   vertex(0, riverY - 245);
@@ -103,7 +103,7 @@ let fade = map(worldScroll, 0, (cliffX - width) * 1.6, 255, 40);
 
   endShape(CLOSE);
 
-  // lower grassy bank 
+  // lower grassy
   fill(125, 165, 110, fade);
   beginShape();
   vertex(0, riverY + riverH + 25);
@@ -280,7 +280,7 @@ function drawCliff(cliffWorldX, scrollAmount, riverTop, riverHeight) {
 
     endShape(CLOSE);
 
-    // darker side shadow
+    // darker shadow
     fill(60, 55, 55);
     beginShape();
     vertex(cliffScreenX + 145, riverTop + riverHeight + 5);
